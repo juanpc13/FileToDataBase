@@ -9,19 +9,13 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Locale;
-import javafx.util.converter.LocalDateTimeStringConverter;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -32,11 +26,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  */
 public class Main {
 
-    private final String url = "jdbc:postgresql://34.70.49.21:1000/prototipo1";
-    private final String user = "postgres";
-    private final String password = "Cal15!";
-    private final String SQL = "INSERT INTO data(date_time,latitude,longitude,altitude,presion,humedad,temperatura,co2a,co2b,h2s,so2) VALUES(?,?,?,?,?,?,?,?,?,?,?)";
-
     private Connection conn;
     private PreparedStatement statement;
 
@@ -45,7 +34,13 @@ public class Main {
 
     public static void main(String[] args) throws SQLException, ParseException {
         Main program = new Main();
-        if (program.initConection()) {
+        
+        String url=JOptionPane.showInputDialog("Ingresar la dirreccion IP de la base de datos:\nejemplo: 35.225.89.211");
+        url = "jdbc:postgresql://"+url+":1000/prototipo1";
+        String user = "postgres";
+        String password = "Cal15!";
+        
+        if (program.initConection(url, user, password)) {
             program.star();
         }
     }
@@ -91,9 +86,12 @@ public class Main {
         }
     }
 
-    public boolean initConection() {
+    public boolean initConection(String url, String user, String password) {
         try {
-            conn = connect();
+            conn = connect(url, user, password);
+            
+            String SQL = "INSERT INTO data(date_time,latitude,longitude,altitude,presion,humedad,temperatura,co2a,co2b,h2s,so2) VALUES(?,?,?,?,?,?,?,?,?,?,?)";
+            
             statement = conn.prepareStatement(SQL);
             return true;
         } catch (Exception e) {
@@ -104,7 +102,7 @@ public class Main {
 
     }
 
-    public Connection connect() throws SQLException {
+    public Connection connect(String url, String user, String password) throws SQLException {
         return DriverManager.getConnection(url, user, password);
     }
 
